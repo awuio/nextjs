@@ -3,14 +3,8 @@ import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import { fetchInvoiceById, fetchCustomers } from '@/app/lib/data';
 import { notFound } from 'next/navigation';
 
-type PageProps = {
-  params: {
-    id: string;
-  };
-};
-
-export default async function Page({ params }: PageProps) {
-  const id = params.id;
+export default async function Page({ params }: { params: Promise<{ id: string }>}) {
+  const {id} = await params;
 
   const [invoice, customers] = await Promise.all([
     fetchInvoiceById(id),

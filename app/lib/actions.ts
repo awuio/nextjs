@@ -103,14 +103,16 @@ export async function updateInvoice(
   redirect("/dashboard/invoices");
 }
 
-export async function deleteInvoice(id: string) {
+export async function deleteInvoice(id: string): Promise<void> {
   try {
     await sql`DELETE FROM invoices WHERE id = ${id}`;
-  } catch  {
-    return { message: "Database Error: Failed to Delete Invoice." };
+  } catch (err) {
+    // log แล้วโยน Error ออกไป — ไม่ return object
+    console.error('Database Error: Failed to delete invoice', err);
+    throw new Error('Failed to delete invoice');     // ✅ ยังคงเป็น Promise<void>
   }
 
-  revalidatePath("/dashboard/invoices");
+  revalidatePath('/dashboard/invoices');
 }
 
 export async function authenticate(
