@@ -4,6 +4,9 @@ import { z } from "zod";
 import postgres from "postgres";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { signIn } from '@/auth';
+import { AuthError } from 'next-auth';
+
 export type State = {
   errors?: {
     customerId?: string[];
@@ -54,7 +57,7 @@ export async function createInvoice(prevState: State, formData: FormData) {
     INSERT INTO invoices (customer_id, amount, status, date)
     VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
     `;
-  } catch (error) {
+  } catch  {
     return {
       message: "Datavase Error: Failed to Create Invoice.",
     };
@@ -92,7 +95,7 @@ export async function updateInvoice(
     SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
     WHERE id = ${id}
     `;
-  } catch (error) {
+  } catch  {
     return { message: "Database Error: Failed to Update Invoice." };
   }
 
@@ -101,13 +104,31 @@ export async function updateInvoice(
 }
 
 export async function deleteInvoice(id: string) {
-  throw new Error("Fail to Delete Invoice");
-
   try {
     await sql`DELETE FROM invoices WHERE id = ${id}`;
-  } catch (error) {
+  } catch  {
     return { message: "Database Error: Failed to Delete Invoice." };
   }
 
   revalidatePath("/dashboard/invoices");
+}
+
+export async function authenticate(
+  prevState: string | undefined,
+  formdata: FormData,
+) {
+  try {
+    await signIn('credentials', formdata);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return 'Invalid credentials.';
+          default:
+            return 'Something went wrong.';
+      }
+    }
+    throw error;
+  }
+  
 }

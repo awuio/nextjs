@@ -1,12 +1,11 @@
 "use client";
 
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useDebouncedCallback } from "use-debounce";
 
 export default function Search({ placeholder }: { placeholder: string }) {
   const searchParams = useSearchParams();
-  const pathname = usePathname();
   const router = useRouter();
 
   const handleSearch = useDebouncedCallback((term: string) => {
